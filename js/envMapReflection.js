@@ -21,7 +21,7 @@ function init() {
 
     //  EnvMap (CubeTexture)
     var loader = new THREE.CubeTextureLoader();
-    loader.setPath('../image/envMap/');
+    loader.setPath('https://raw.githubusercontent.com/Aelly/ThreeJSDemo/master/image/envMap/');
     var textureCube = loader.load([
         'heather_ft.jpg', 'heather_bk.jpg',
         'heather_up.jpg', 'heather_dn.jpg',
