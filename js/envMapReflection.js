@@ -43,16 +43,9 @@ function init() {
     //  Light
     ambiantLight = new THREE.AmbientLight(0xffffff, 1);
 
-    animate();
-}
+    window.addEventListener( 'resize', onWindowResize, false );
 
-function animate() {
-    renderer.render(scene, camera);
-    requestAnimationFrame(animate);
-}
-init();
-
-//  GUI Controler
+    //  GUI Controler
 var Controller = function() {
     this.ambiantLight = false;
     this.ambientLightIntensity = 1;
@@ -84,3 +77,20 @@ gui.add(controller, 'roughness', 0, 1).onChange(function(newValue) {
 gui.add(controller, 'metalness', 0, 1).onChange(function(newValue) {
     mesh.material.metalness = newValue;
 });
+
+    animate();
+}
+
+function animate() {
+    renderer.render(scene, camera);
+    requestAnimationFrame(animate);
+}
+init();
+
+
+
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize( window.innerWidth, window.innerHeight );
+}

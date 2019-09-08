@@ -17,17 +17,20 @@ var renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-var light1 = new THREE.PointLight(0xffffff, 0.5, 100);
-light1.position.set(0, 0, 5);
-scene.add(light1);
-
+// Directional light
 var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
 directionalLight.position.set(1, 1, 1).normalize();
 scene.add(directionalLight);
 
-
+// Ambient light
 scene.add(new THREE.AmbientLight(0x222222));
 
+// Moving light
+var light1 = new THREE.PointLight(0xffffff, 0.5, 100);
+light1.position.set(0, 0, 5);
+scene.add(light1);
+
+// Moving light particule
 var lightParticuleGeometry = new THREE.SphereGeometry(0.1, 16, 16);
 var lightParticuleMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff })
 var lightParticuleMesh = new THREE.Mesh(lightParticuleGeometry, lightParticuleMaterial);
@@ -44,8 +47,7 @@ var textureCube = loader.load([
 ]);
 scene.background = textureCube;
 
-// envMap: textureCube
-// Sphere
+// Spheres
 var sphereGeometry = new THREE.SphereGeometry(0.4, 32, 32);
 for (i = 0; i < 6; i++) {
     for (j = 0; j < 6; j++) {
@@ -74,3 +76,11 @@ function animate() {
     renderer.render(scene, camera);
 }
 animate();
+
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize( window.innerWidth, window.innerHeight );
+}
+
+window.addEventListener( 'resize', onWindowResize, false );
