@@ -1,0 +1,62 @@
+body {
+    margin: 0;
+}
+
+canvas {
+    width: 100%;
+    height: 100%
+}
+
+html, body {
+    margin: 0; 
+    height: 100%; 
+    overflow: hidden
+}
+
+
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    width: 200px;
+    background-color: #f1f1f1;
+}
+
+li a {
+    display: block;
+    color: #000;
+    padding: 8px 16px;
+    text-decoration: none;
+}
+
+/* Change the link color on hover */
+li a:hover {
+    background-color: #555;
+    color: white;
+}
+
+.nav-bar{
+    position: absolute;
+    z-index: 5; 
+    background-color: #f1f1f1;    
+    width: 200px;      
+}
+
+.nav-bar p{
+    background-color: #555;
+    text-align: center;
+    margin-top: 0; 
+    margin-bottom: 0;
+    color: #f1f1f1; 
+    font-size: 13px;
+}
+
+.nav-bar b{
+    color: #f1f1f1; 
+    font-size: 20px;
+}
+
+.active {
+    background-color: rgb(76, 163, 175);
+    color: white;
+  }

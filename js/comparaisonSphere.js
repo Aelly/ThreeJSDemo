@@ -25,6 +25,7 @@ var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
 directionalLight.position.set(1, 1, 1).normalize();
 scene.add(directionalLight);
 
+
 scene.add(new THREE.AmbientLight(0x222222));
 
 var lightParticuleGeometry = new THREE.SphereGeometry(0.1, 16, 16);
@@ -35,11 +36,11 @@ scene.add(lightParticuleMesh);
 
 //  EnvMap (CubeTexture)
 var loader = new THREE.CubeTextureLoader();
-loader.setPath('../image/envMap/');
+loader.setPath('../image/envMap/envMap_Park/');
 var textureCube = loader.load([
-    'tropic_ft.jpg', 'tropic_bk.jpg',
-    'tropic_up.jpg', 'tropic_dn.jpg',
-    'tropic_rt.jpg', 'tropic_lf.jpg'
+    'px.jpg', 'nx.jpg', // left - right
+    'py.jpg', 'ny.jpg', // top - botton
+    'pz.jpg', 'nz.jpg' // 
 ]);
 scene.background = textureCube;
 
