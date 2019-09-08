@@ -36,7 +36,7 @@ scene.add(lightParticuleMesh);
 
 //  EnvMap (CubeTexture)
 var loader = new THREE.CubeTextureLoader();
-loader.setPath('https://github.com/Aelly/ThreeJSDemo/tree/master/image/envMap/envMap_Park/');
+loader.setPath('https://raw.githubusercontent.com/Aelly/ThreeJSDemo/master/image/envMap/envMap_Park/');
 var textureCube = loader.load([
     'px.jpg', 'nx.jpg', // left - right
     'py.jpg', 'ny.jpg', // top - botton
