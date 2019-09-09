@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Three.js Démo</title>
+
+    <link rel="stylesheet" type="text/css" href="../css/style.css">
+</head>
+
+<body>
+        <div class="nav-bar">
+            <p>
+                <b>Created by Aelly</b></Created>  <br> three.js + dat.GUI
+            </p>
+
+            <ul>
+                <li><a href="../index.html">Basic material</a></li>
+                <li><a href="PhongComparaison.html">Phong visualisation</a></li>
+                <li><a href="PhongComparaison.html">Portail</a></li>
+                <li class="active"><a>Water</a></li>
+            </ul>
+        </div>
+        
+        
+    <script src="../js/three.js"></script>
+    <script src="../js/dat.gui.min.js"></script>
+    <script src="../js/OrbitControls.js"></script>
+    <script src="../js/water.js"></script>
+
+    <script type="x-shader/x-vertex" id="vertexShader">
+        attribute float vertexDisplacement;
+        uniform float delta;
+        varying float vOpacity;
+        varying vec3 vUv;
+
+        void main()
+        {
+            vUv = position;
+            vOpacity = vertexDisplacement;
+
+            vec3 p = position;
+            
+            p.x += sin(vertexDisplacement) * 50.0;
+            p.y += cos(vertexDisplacement) * 50.0;
+
+            vec4 modelViewPosition = modelViewMatrix * vec4(p, 1.0);
+            gl_Position = projectionMatrix * modelViewPosition;
+        }
+    </script>
+
+    <script type="x-shader/x-fragment" id="fragmentShader">
+        uniform float delta;
+        varying float vOpacity;
+        varying vec3 vUv;
+
+        void main()
+        {
+            float r = 1.0 + cos(vUv.x * delta);
+            float g = 0.5 + sin(delta) * 0.5;
+            float b = 0.0;
+
+            gl_FragColor = vec4(r, g, b, vOpacity);
+        }
+    </script>
+</body>
+
+</html>
