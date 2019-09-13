@@ -1,8 +1,10 @@
 var scene, sceneLight, cam, renderer;
 var clock;
 var waterSurface;
+var mirrorCam;
 
 var vertexText, fragmentText;
+var renderTarget;
 
 var plankTexture;
 var waterNormalTexture;
@@ -10,14 +12,24 @@ var waterNormalTexture;
 function init() {
     scene = new THREE.Scene();
 
+    renderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerWidth);
+
     sceneLight = new THREE.DirectionalLight(0xffffff, 0.5);
-    sceneLight.position.set(0, 0, 1);
+    sceneLight.position.set(0, 0, -10);
     scene.add(sceneLight);
+
+    var ambiantLight = new THREE.AmbientLight(0xffffff, 1);
+    scene.add(ambiantLight);
 
     cam = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 1, 10000);
     cam.position.z = 5;
     cam.position.y = 10;
     scene.add(cam);
+
+    mirrorCam = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 1, 10000);
+    mirrorCam.position.z = cam.position.z;
+    mirrorCam.position.y = -cam.position.y;
+    mirrorCam.target = cam.target;
 
     renderer = new THREE.WebGLRenderer();
     renderer.setClearColor(0x000000, 1);
@@ -68,7 +80,12 @@ function initObject() {
         map: plankTexture,
         side: THREE.DoubleSide
     });
-    var plank = new THREE.Mesh(geometry, material);
+
+    var mirrorMaterial = new THREE.MeshPhongMaterial({
+        map: renderTarget.texture,
+      });
+
+    var plank = new THREE.Mesh(geometry, mirrorMaterial);
     scene.add(plank);
 
     plank.rotation.x = -90;
@@ -97,15 +114,21 @@ function initObject() {
         fragmentShader: fragmentText
     });
     waterSurface = new THREE.Mesh(geometry, shaderMaterial);
-    scene.add(waterSurface);
+    // scene.add(waterSurface);
     waterSurface.rotation.x = -90;
     waterSurface.position.y = -2.8;
 
-    var vertexDisplacement = new Float32Array(geometry.attributes.position.count);
-    for (var i = 0; i < vertexDisplacement.length; i += 1) {
-        vertexDisplacement[i] = Math.sin(i);
-    }
-    geometry.addAttribute('vertexDisplacement', new THREE.BufferAttribute(vertexDisplacement, 1));
+    var cubeGeometry = new THREE.BoxGeometry( 1, 1, 1 );
+    var cubeMaterial = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+    var cube = new THREE.Mesh( cubeGeometry, cubeMaterial );
+    cube.position.set(0,-2,-5);
+    scene.add( cube );
+
+    var lightParticuleGeometry = new THREE.SphereGeometry(1, 16, 16);
+    var lightParticuleMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff })
+    var lightParticuleMesh = new THREE.Mesh(lightParticuleGeometry, lightParticuleMaterial);
+    lightParticuleMesh.position.set(sceneLight.position.x, sceneLight.position.y, sceneLight.position.z);
+    scene.add(lightParticuleMesh);
 
     animate();
 }
@@ -113,6 +136,19 @@ function initObject() {
 function animate() {
     waterSurface.material.uniforms.time.value = clock.getElapsedTime() / 10;
 
+    mirrorCam.position.x = cam.position.x;
+    mirrorCam.position.y = -cam.position.y + 3;
+    mirrorCam.position.z = cam.position.z;
+    mirrorCam.target = cam.target;
+    // mirrorCam.up = cam.up;
+
+    // mirrorCam.position = cam.position.reflect(new THREE.Vector3(0,1,0));
+
+    renderer.render(scene, cam);
+    
+    renderer.setRenderTarget(renderTarget);
+    renderer.render(scene, mirrorCam);
+    renderer.setRenderTarget(null);
     renderer.render(scene, cam);
 
     requestAnimationFrame(animate);
