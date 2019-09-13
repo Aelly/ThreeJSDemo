@@ -36,7 +36,7 @@ function init() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    let controls = new THREE.OrbitControls(cam);
+    let controls = new THREE.OrbitControls(cam, renderer.domElement);
     controls.addEventListener('change', renderer);
     controls.mouseButtons = {
         LEFT: THREE.MOUSE.RIGHT,
