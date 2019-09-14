@@ -105,12 +105,12 @@ function initCube(){
     plane4.position.y = 5;
     plane4.rotation.y = -(Math.PI / 2);
     scene.add(plane4);
-    let plane5 = new THREE.Mesh(planeGeometry, new THREE.MeshBasicMaterial( {color: 0xf45b69, side: THREE.BackSide} ));
+    let plane5 = new THREE.Mesh(planeGeometry, new THREE.MeshBasicMaterial( {color: 0xaec6cf, side: THREE.BackSide} ));
     plane5.rotation.x = -(Math.PI / 2);
     plane5.position.y = 5;
     plane5.position.y = 10;
     scene.add(plane5);
-    let plane6 = new THREE.Mesh(planeGeometry, new THREE.MeshBasicMaterial( {color: 0xf036a5, side: THREE.BackSide} ));
+    let plane6 = new THREE.Mesh(planeGeometry, new THREE.MeshBasicMaterial( {color: 0x77dd77, side: THREE.BackSide} ));
     plane6.rotation.x = Math.PI / 2;
     plane6.position.y = -0.01;
     scene.add(plane6);
