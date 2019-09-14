@@ -10,13 +10,12 @@ var textureCow;
 var texturePanda1, texturePanda2, texturePanda3, texturePanda4;
 
 var sphere;
+var ball;
 
-const mirrorHeight = -4.99;
 
 window.addEventListener('resize', onResize, false);
 
 var w, h;
-
 function onResize() {
 
     w = window.innerWidth;
@@ -132,24 +131,38 @@ function initObjects(){
         vertexShader: vertexText,
         fragmentShader: fragmentText
     });
+
     var circle = new THREE.Mesh( circleGeometry, shaderMaterial );
     circle.rotation.x = -(Math.PI / 2);
     circle.position.y = 0;
     scene.add( circle );
 
-    var geometry = new THREE.SphereBufferGeometry( 2, 32, 32 );
-    var material = new THREE.MeshBasicMaterial( {map: textureCow} );
-    sphere = new THREE.Mesh( geometry, material );
+    var sphereGeometry = new THREE.SphereBufferGeometry( 2, 32, 32 );
+    var sphereMaterial = new THREE.MeshBasicMaterial( {map: textureCow} );
+    sphere = new THREE.Mesh( sphereGeometry, sphereMaterial );
     sphere.position.y = 2;
     scene.add( sphere );
+
+    var ballGeometry = new THREE.SphereBufferGeometry(0.5, 8,8);
+    var ballMaterial = new THREE.MeshBasicMaterial({color: 0xffffff});
+    ball = new THREE.Mesh(ballGeometry, ballMaterial);
+    scene.add(ball);
+    ball.position.z = 5;
+    ball.position.y = 1;
 
     animate();
 }
 
 var cameraDirection = new THREE.Vector3(); 
 var target = new THREE.Vector3();
+var ballRotation = 0;
 function animate() {
     sphere.rotation.y += 0.01;
+    ballRotation -= 0.01;
+
+    ball.position.y = Math.cos(ballRotation*2) + 1 * 2.5;
+    ball.position.x = 3 * Math.sin(ballRotation);
+    ball.position.z = 3 * Math.cos(ballRotation);
 
     cameraMirror.position.set(camera.position.x, -camera.position.y, camera.position.z);
 
@@ -158,7 +171,6 @@ function animate() {
     target = new THREE.Vector3(camera.position.x, camera.position.y, camera.position.z);
     target.add(cameraDirection).reflect(new THREE.Vector3(0,1,0));
     cameraMirror.lookAt(target);
-
     
     renderer.setRenderTarget(renderTarget);
     renderer.render(scene, cameraMirror);

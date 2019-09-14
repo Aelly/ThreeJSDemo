@@ -43,7 +43,6 @@ function init() {
         MIDDLE: THREE.MOUSE.MIDDLE,
         RIGHT: THREE.MOUSE.LEFT
     };
-    // controls.enablePan = false;
     controls.minDistance = 0;
     controls.maxDistance = 10;
 
@@ -81,12 +80,8 @@ function initObject() {
         side: THREE.DoubleSide
     });
 
-    var mirrorMaterial = new THREE.MeshPhongMaterial({
-        map: renderTarget.texture,
-      });
-
-    var plank = new THREE.Mesh(geometry, mirrorMaterial);
-    scene.add(plank);
+    var plank = new THREE.Mesh(geometry, material);
+    // scene.add(plank);
 
     plank.rotation.x = -90;
     plank.position.y = -3;
@@ -94,6 +89,9 @@ function initObject() {
     var customUniforms = {
         normalSampler: {
             value: waterNormalTexture
+        },
+        reflectionTexture:{
+            value: renderTarget.texture
         },
         sunDirection: {
             type: 'vec3',
@@ -114,7 +112,7 @@ function initObject() {
         fragmentShader: fragmentText
     });
     waterSurface = new THREE.Mesh(geometry, shaderMaterial);
-    // scene.add(waterSurface);
+    scene.add(waterSurface);
     waterSurface.rotation.x = -90;
     waterSurface.position.y = -2.8;
 
@@ -133,18 +131,18 @@ function initObject() {
     animate();
 }
 
+var cameraDirection = new THREE.Vector3(); 
+var target = new THREE.Vector3();
 function animate() {
     waterSurface.material.uniforms.time.value = clock.getElapsedTime() / 10;
 
-    mirrorCam.position.x = cam.position.x;
-    mirrorCam.position.y = -cam.position.y + 3;
-    mirrorCam.position.z = cam.position.z;
-    mirrorCam.target = cam.target;
-    // mirrorCam.up = cam.up;
+    mirrorCam.position.set(cam.position.x, -cam.position.y -3, cam.position.z);
 
-    // mirrorCam.position = cam.position.reflect(new THREE.Vector3(0,1,0));
+    cam.getWorldDirection(cameraDirection);
 
-    renderer.render(scene, cam);
+    target = new THREE.Vector3(cam.position.x, cam.position.y, cam.position.z);
+    target.add(cameraDirection).reflect(new THREE.Vector3(0,1,0));
+    mirrorCam.lookAt(target);
     
     renderer.setRenderTarget(renderTarget);
     renderer.render(scene, mirrorCam);

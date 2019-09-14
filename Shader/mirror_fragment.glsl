@@ -1,4 +1,3 @@
-varying vec4 worldPosition;
 varying vec4 clipSpace;
 
 uniform sampler2D reflectionTexture;

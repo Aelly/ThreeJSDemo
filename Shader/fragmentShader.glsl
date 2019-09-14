@@ -1,9 +1,11 @@
 uniform sampler2D normalSampler;
+uniform sampler2D reflectionTexture;
+
 uniform vec3 sunDirection;
 uniform vec3 eyePosition;
 uniform float time;
 
-varying vec4 worldPosition;
+varying vec4 clipSpace;
 
 vec3 sunColor = vec3(1.0, 1.0, 1.0);
 
@@ -28,19 +30,25 @@ void sunLight(const vec3 surfaceNormal, const vec3 eyeDirection, float shiny, fl
 }
 
 void main() {
+    vec2 ndc = (clipSpace.xy / clipSpace.w)/2.0 + 0.5;
+    vec2 reflectTextCoords = vec2(ndc.x, 1.0-ndc.y);
+
+    vec4 reflectColor = texture2D(reflectionTexture, reflectTextCoords);
+
     vec4 eye = vec4(eyePosition, 1.0);
     
-    vec4 noise = getNoise(worldPosition.xz);
+    vec4 noise = getNoise(clipSpace.xz);
     vec3 surfaceNormal = normalize(noise.xzy*vec3(2.0, 1.0, 2.0));
 
     vec3 diffuse = vec3(0.0);
     vec3 specular = vec3(0.0);
 
-    vec3 worldToEye = (eye-worldPosition).xyz;
+    vec3 worldToEye = (eye-clipSpace).xyz;
     vec3 eyeDirection = normalize(worldToEye);
 
     sunLight(surfaceNormal, eyeDirection, 100.0, 2.0, 0.5, diffuse, specular);
 
-	gl_FragColor = vec4((diffuse+specular+vec3(0.1))*vec3(0.3, 0.5, 0.9), 1.0);
+    gl_FragColor = reflectColor;
+	// gl_FragColor = vec4((diffuse+specular+vec3(0.1))*vec3(0.3, 0.5, 0.9), 1.0);
 }
 
