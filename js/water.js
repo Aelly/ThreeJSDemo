@@ -15,7 +15,7 @@ function init() {
     renderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerWidth);
 
     sceneLight = new THREE.DirectionalLight(0xffffff, 0.5);
-    sceneLight.position.set(0, 0, -10);
+    sceneLight.position.set(0, 8, -10);
     scene.add(sceneLight);
 
     var ambiantLight = new THREE.AmbientLight(0xffffff, 1);
@@ -27,9 +27,6 @@ function init() {
     scene.add(cam);
 
     mirrorCam = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 1, 10000);
-    mirrorCam.position.z = cam.position.z;
-    mirrorCam.position.y = -cam.position.y;
-    mirrorCam.target = cam.target;
 
     renderer = new THREE.WebGLRenderer();
     renderer.setClearColor(0x000000, 1);
@@ -44,7 +41,7 @@ function init() {
         RIGHT: THREE.MOUSE.LEFT
     };
     controls.minDistance = 0;
-    controls.maxDistance = 10;
+    controls.maxDistance = 20;
 
     clock = new THREE.Clock();
 
@@ -83,7 +80,7 @@ function initObject() {
     var plank = new THREE.Mesh(geometry, material);
     // scene.add(plank);
 
-    plank.rotation.x = -90;
+    plank.rotation.x = Math.PI / 2;
     plank.position.y = -3;
 
     var customUniforms = {
@@ -109,18 +106,23 @@ function initObject() {
     let shaderMaterial = new THREE.ShaderMaterial({
         uniforms: customUniforms,
         vertexShader: vertexText,
-        fragmentShader: fragmentText
+        fragmentShader: fragmentText,
+        side: THREE.DoubleSide
     });
     waterSurface = new THREE.Mesh(geometry, shaderMaterial);
     scene.add(waterSurface);
-    waterSurface.rotation.x = -90;
-    waterSurface.position.y = -2.8;
+    waterSurface.rotation.x = Math.PI / 2;
+    waterSurface.position.y = 0;
 
     var cubeGeometry = new THREE.BoxGeometry( 1, 1, 1 );
     var cubeMaterial = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
     var cube = new THREE.Mesh( cubeGeometry, cubeMaterial );
-    cube.position.set(0,-2,-5);
+    cube.position.set(0, 2, -5);
     scene.add( cube );
+
+    cube2 = new THREE.Mesh(cubeGeometry, new THREE.MeshBasicMaterial({color: 0xff00ff}));
+    cube2.position.set(0,3,3);
+    scene.add(cube2);
 
     var lightParticuleGeometry = new THREE.SphereGeometry(1, 16, 16);
     var lightParticuleMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff })
@@ -136,7 +138,7 @@ var target = new THREE.Vector3();
 function animate() {
     waterSurface.material.uniforms.time.value = clock.getElapsedTime() / 10;
 
-    mirrorCam.position.set(cam.position.x, -cam.position.y -3, cam.position.z);
+    mirrorCam.position.set(cam.position.x, -cam.position.y, cam.position.z);
 
     cam.getWorldDirection(cameraDirection);
 
