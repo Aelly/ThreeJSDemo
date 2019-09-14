@@ -6,6 +6,8 @@ uniform vec3 eyePosition;
 uniform float time;
 
 varying vec4 clipSpace;
+varying vec4 worldPosition;
+varying vec2 vUV;
 
 vec3 sunColor = vec3(1.0, 1.0, 1.0);
 
@@ -37,19 +39,20 @@ void main() {
 
     vec4 eye = vec4(eyePosition, 1.0);
     
-    vec4 noise = getNoise(clipSpace.xz);
+    vec4 noise = getNoise(vUV);
     vec3 surfaceNormal = normalize(noise.xzy*vec3(2.0, 1.0, 2.0));
 
     vec3 diffuse = vec3(0.0);
     vec3 specular = vec3(0.0);
 
-    vec3 worldToEye = (eye-clipSpace).xyz;
+    vec3 worldToEye = (eye-worldPosition).xyz;
     vec3 eyeDirection = normalize(worldToEye);
 
     sunLight(surfaceNormal, eyeDirection, 100.0, 2.0, 0.5, diffuse, specular);
 
     // gl_FragColor = reflectColor;
     vec3 color = vec3(0.3, 0.5, 0.9);
-	gl_FragColor = vec4(color*(reflectColor+vec3(0.1))*(diffuse+specular+0.3)*2.0, 1.0);
+	// gl_FragColor = vec4(color*(reflectColor+vec3(0.1))*(diffuse+specular+0.3)*2.0, 1.0);
+    gl_FragColor = texture2D(normalSampler, vec2(vUV));
 }
 

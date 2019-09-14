@@ -1,10 +1,14 @@
 varying vec4 clipSpace;
+varying vec4 worldPosition;
+varying vec2 vUV;
 
 void main()
 {
-	vec4 worldPosition = modelViewMatrix * vec4(position, 1.0);
+	vUV = uv;
 
-    clipSpace = projectionMatrix * worldPosition;
+	worldPosition = modelViewMatrix * vec4(position, 1.0);
+
+    clipSpace = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 
 	gl_Position = clipSpace;
 }

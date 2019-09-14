@@ -61,8 +61,7 @@ function loadTexture() {
     loader.load("../image/texture/plank.jpg", function (texture_plank) {
         plankTexture = texture_plank;
         loader.load("../image/map/water_normal.png", function (texture_water) {
-            texture_water.wrapS = texture_water.wrapT = THREE.RepeatWrapping;
-            texture_water.repeat.set( 3, 3 );
+            // texture_water.wrapS = texture_water.wrapT = THREE.RepeatWrapping;
 
             waterNormalTexture = texture_water;
             initObject();
