@@ -7,6 +7,7 @@ var renderTarget;
 var vertexText, fragmentText;
 
 var textureCow;
+var texturePanda1, texturePanda2, texturePanda3, texturePanda4;
 
 var sphere;
 
@@ -37,7 +38,7 @@ function init() {
     renderTarget.texture.generateMipmaps = false;
 
     camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
-    camera.position.set(0,10,15);
+    camera.position.set(0,10,10);
 
     cameraMirror = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
 
@@ -47,7 +48,9 @@ function init() {
         MIDDLE: THREE.MOUSE.MIDDLE,
         RIGHT: THREE.MOUSE.LEFT
     };
-    // controls.enablePan = false;
+    controls.target0.set(0,4,0);
+    controls.reset();
+    controls.enablePan = false;
 
     loadShader();
 }
@@ -64,28 +67,40 @@ function loadTexture(){
     let loader = new THREE.TextureLoader();
     loader.load("../image/texture/cow.jpg", function (texture) {
         textureCow = texture;
-        initObjects();
+        loader.load("../image/texture/panda1.jpg", function(texture){
+            texturePanda1 = texture;
+            loader.load("../image/texture/panda2.jpg", function(texture){
+                texturePanda2 = texture;
+                loader.load("../image/texture/panda3.jpg", function(texture){
+                    texturePanda3 = texture;
+                    loader.load("../image/texture/panda4.jpg", function(texture){
+                        texturePanda4 = texture;
+                        initObjects();
+                    });
+                });
+            });
+        });
     });
 }
 
 
 function initCube(){
     let planeGeometry = new THREE.PlaneBufferGeometry(10, 10);
-    let plane1 = new THREE.Mesh(planeGeometry, new THREE.MeshBasicMaterial( {color: 0x52489c, side: THREE.BackSide} ));
+    let plane1 = new THREE.Mesh(planeGeometry, new THREE.MeshBasicMaterial( {map: texturePanda1, side: THREE.BackSide} ));
     plane1.position.z = 5;
     plane1.position.y = 5;
     scene.add(plane1);
-    let plane2 = new THREE.Mesh(planeGeometry, new THREE.MeshBasicMaterial( {color: 0x4062bb, side: THREE.BackSide} ));
+    let plane2 = new THREE.Mesh(planeGeometry, new THREE.MeshBasicMaterial( {map: texturePanda2, side: THREE.BackSide} ));
     plane2.position.x = 5;
     plane2.position.y = 5;
     plane2.rotation.y = Math.PI / 2;
     scene.add(plane2);
-    let plane3 = new THREE.Mesh(planeGeometry, new THREE.MeshBasicMaterial( {color: 0x59c3c3, side: THREE.BackSide} ));
+    let plane3 = new THREE.Mesh(planeGeometry, new THREE.MeshBasicMaterial( {map: texturePanda3, side: THREE.BackSide} ));
     plane3.position.z = -5;
     plane3.position.y = 5;
     plane3.rotation.y = Math.PI;
     scene.add(plane3);
-    let plane4 = new THREE.Mesh(planeGeometry, new THREE.MeshBasicMaterial( {color: 0xebebeb, side: THREE.BackSide} ));
+    let plane4 = new THREE.Mesh(planeGeometry, new THREE.MeshBasicMaterial( {map: texturePanda4, side: THREE.BackSide} ));
     plane4.position.x = -5;
     plane4.position.y = 5;
     plane4.rotation.y = -(Math.PI / 2);
@@ -136,13 +151,14 @@ var target = new THREE.Vector3();
 function animate() {
     sphere.rotation.y += 0.01;
 
+    cameraMirror.position.set(camera.position.x, -camera.position.y, camera.position.z);
+
     camera.getWorldDirection(cameraDirection);
 
     target = new THREE.Vector3(camera.position.x, camera.position.y, camera.position.z);
     target.add(cameraDirection).reflect(new THREE.Vector3(0,1,0));
     cameraMirror.lookAt(target);
 
-    cameraMirror.position.set(camera.position.x, -camera.position.y, camera.position.z);
     
     renderer.setRenderTarget(renderTarget);
     renderer.render(scene, cameraMirror);
