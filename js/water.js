@@ -1,19 +1,41 @@
 var scene, sceneLight, cam, renderer;
-var scene
 var clock;
 var waterSurface;
 var mirrorCam;
 
 var vertexText, fragmentText;
-var renderTarget;
+var renderTargetReflection;
+var renderTargetRefraction;
 
-var plankTexture;
+var floorTexture;
 var waterNormalTexture;
+var waterDistortionTexture;
+
+var cameraDirection = new THREE.Vector3();
+var target = new THREE.Vector3();
+
+// Tableau des objets devant être réfléchi et réfracté
+var objectToReflect = [];
+var objectToRefract = [];
+
+// Listener pour resize la fenetre de rendu
+window.addEventListener('resize', onResize, false);
+var w, h;
+function onResize() {
+
+    w = window.innerWidth;
+    h = window.innerHeight;
+
+    renderTargetReflection.setSize(w, h);
+    renderTargetRefraction.setSize(w, h);
+    renderer.setSize(w,h);
+};
 
 function init() {
     scene = new THREE.Scene();
 
-    renderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerWidth);
+    renderTargetReflection = new THREE.WebGLRenderTarget(window.innerWidth, window.innerWidth);
+    renderTargetRefraction = new THREE.WebGLRenderTarget(window.innerWidth, window.innerWidth);
 
     sceneLight = new THREE.DirectionalLight(0xffffff, 0.5);
     sceneLight.position.set(0, 8, -10);
@@ -46,11 +68,21 @@ function init() {
 
     clock = new THREE.Clock();
 
+    var loader = new THREE.CubeTextureLoader();
+    loader.setPath('https://raw.githubusercontent.com/Aelly/ThreeJSDemo/master/image/envMap/envMap_Heather/');
+    var textureCube = loader.load([
+        'heather_ft.jpg', 'heather_bk.jpg',
+        'heather_up.jpg', 'heather_dn.jpg',
+        'heather_rt.jpg', 'heather_lf.jpg'
+    ]);
+
+    scene.background = textureCube;
+
     loadShader();
 }
 
 function loadShader() {
-    ShaderLoader("../Shader/vertexShader.glsl", "../Shader/fragmentShader.glsl", function (vertex, fragment) {
+    ShaderLoader("../Shader/water_vertex.glsl", "../Shader/water_fragment.glsl", function (vertex, fragment) {
         vertexText = vertex;
         fragmentText = fragment;
         loadTexture();
@@ -59,105 +91,35 @@ function loadShader() {
 
 function loadTexture() {
     let loader = new THREE.TextureLoader();
-    loader.load("../image/texture/plank.jpg", function (texture_plank) {
-        plankTexture = texture_plank;
+    loader.load("../image/texture/ocean-floor.jpg", function (floor_Texture) {
+        floorTexture = floor_Texture;
         loader.load("../image/map/water_normal.png", function (texture_water) {
-            // texture_water.wrapS = texture_water.wrapT = THREE.RepeatWrapping;
-
             waterNormalTexture = texture_water;
-            initObject();
+            waterNormalTexture.wrapS = waterNormalTexture.wrapT = THREE.RepeatWrapping
+            loader.load("../image/map/water_dudv.png", function(texture_distortion){
+                waterDistortionTexture = texture_distortion;
+                initObject();
+            });
+
         });
     });
 }
 
-function calculateTangent(geometry) {
-    var positionAttributes = geometry.getAttribute('position');
-    var uvAttributes = geometry.getAttribute('uv');
-
-
-    var realVertices = [];
-    var realUvs = [];
-
-    for (var i = 0; i < positionAttributes.array.length; i += 3) {
-        realVertices.push(new THREE.Vector3(positionAttributes.array[i + 0], positionAttributes.array[i + 1], positionAttributes.array[i + 2]));
-    }
-
-    for (var i = 0; i < uvAttributes.array.length; i += 2) {
-        realUvs.push(new THREE.Vector2(uvAttributes.array[i], uvAttributes.array[i + 1]));
-    }
-
-    var tangents = new Float32Array(positionAttributes.array.length);
-    var bitangents = new Float32Array(positionAttributes.array.length);
-
-
-    var tangArray = [];
-    var bitangentArray = [];
-
-    for (var i = 0; i < realVertices.length; i += 3) {
-        var v0 = realVertices[i + 0];
-        var v1 = realVertices[i + 1];
-        var v2 = realVertices[i + 2];
-
-        var uv0 = realUvs[i + 0];
-        var uv1 = realUvs[i + 1];
-        var uv2 = realUvs[i + 2];
-
-
-        var deltaPos1 = v1.sub(v0);
-        var deltaPos2 = v2.sub(v0);
-
-        var deltaUV1 = uv1.sub(uv0);
-        var deltaUV2 = uv2.sub(uv0);
-
-        var r = 1.0 / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
-        var tangent = deltaPos1.multiplyScalar(deltaUV2.y).sub(deltaPos2.multiplyScalar(deltaUV1.y)).multiplyScalar(r); //p1 * uv2.y - p2 * uv1.y
-        var bitangent = deltaPos2.multiplyScalar(deltaUV2.x).sub(deltaPos1.multiplyScalar(deltaUV2.x)).multiplyScalar(r);
-
-        tangArray.push(tangent.x);
-        tangArray.push(tangent.y);
-        tangArray.push(tangent.z);
-
-        tangArray.push(tangent.x);
-        tangArray.push(tangent.y);
-        tangArray.push(tangent.z);
-
-        tangArray.push(tangent.x);
-        tangArray.push(tangent.y);
-        tangArray.push(tangent.z);
-
-        bitangentArray.push(bitangent.x);
-        bitangentArray.push(bitangent.y);
-        bitangentArray.push(bitangent.z);
-
-        bitangentArray.push(bitangent.x);
-        bitangentArray.push(bitangent.y);
-        bitangentArray.push(bitangent.z);
-
-        bitangentArray.push(bitangent.x);
-        bitangentArray.push(bitangent.y);
-        bitangentArray.push(bitangent.z);
-    }
-
-    for (var i = 0; i < bitangentArray.length; i++) {
-        tangents[i] = tangArray[i];
-        bitangents[i] = bitangentArray[i];
-    }
-
-
-    geometry.addAttribute('tangent', new THREE.BufferAttribute(tangents, 3));
-    geometry.addAttribute('bitangent', new THREE.BufferAttribute(bitangents, 3));
-}
-
 function initWater() {
     let geometry = new THREE.PlaneBufferGeometry(30, 30, 32);
-    // calculateTangent(geometry);
 
     var customUniforms = {
         normalSampler: {
             value: waterNormalTexture
         },
         reflectionTexture: {
-            value: renderTarget.texture
+            value: renderTargetReflection.texture
+        },
+        refractionTexture: {
+            value: renderTargetRefraction.texture
+        },
+        dudvTexture : {
+            value: waterDistortionTexture
         },
         lightPosition: {
             type: 'vec3',
@@ -169,6 +131,12 @@ function initWater() {
         },
         time: {
             value: 1
+        },
+        waterDistortionStrength: {
+            value: 0.015
+        },
+        waterReflectivity: {
+            value: 0.2
         }
     };
 
@@ -186,20 +154,24 @@ function initWater() {
 }
 
 function initObject() {
+    // Floor
     let geometry = new THREE.PlaneBufferGeometry(30, 30, 32);
     let material = new THREE.MeshBasicMaterial({
-        map: plankTexture,
+        map: floorTexture,
         side: THREE.DoubleSide
     });
 
-    var plank = new THREE.Mesh(geometry, material);
-    // scene.add(plank);
+    var floor = new THREE.Mesh(geometry, material);
+    scene.add(floor);
+    objectToRefract.push(floor);
 
-    plank.rotation.x = Math.PI / 2;
-    plank.position.y = -3;
+    floor.rotation.x = Math.PI / 2;
+    floor.position.y = -3;
 
+    // Water
     initWater();
 
+    // Cubes
     var cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
     var cubeMaterial = new THREE.MeshBasicMaterial({
         color: 0x00ff00
@@ -207,13 +179,16 @@ function initObject() {
     var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
     cube.position.set(0, 2, -5);
     scene.add(cube);
+    objectToReflect.push(cube);
 
     cube2 = new THREE.Mesh(cubeGeometry, new THREE.MeshBasicMaterial({
         color: 0xff00ff
     }));
     cube2.position.set(0, 3, 3);
     scene.add(cube2);
+    objectToReflect.push(cube2);
 
+    // Light particule
     var lightParticuleGeometry = new THREE.SphereGeometry(1, 16, 16);
     var lightParticuleMaterial = new THREE.MeshBasicMaterial({
         color: 0xffffff
@@ -221,15 +196,35 @@ function initObject() {
     var lightParticuleMesh = new THREE.Mesh(lightParticuleGeometry, lightParticuleMaterial);
     lightParticuleMesh.position.set(sceneLight.position.x, sceneLight.position.y, sceneLight.position.z);
     scene.add(lightParticuleMesh);
+    objectToReflect.push(lightParticuleMesh);
+
+    setUpUI();
+
+    clock = new THREE.Clock();
 
     animate();
 }
 
-var cameraDirection = new THREE.Vector3();
-var target = new THREE.Vector3();
+function setUpUI(){
+    var Controller = function(){
+        this.waterDistortion = 0.015;
+        this.waterReflectivity = 0.2;
+    }
+    var controller = new Controller();
+
+    var gui = new dat.GUI();
+    
+    gui.add(controller, "waterDistortion", 0, 0.1).onChange(function (newValue){
+        waterSurface.material.uniforms.waterDistortionStrength.value = newValue;
+    });
+    gui.add(controller, "waterReflectivity", 0, 1).onChange(function (newValue){
+        waterSurface.material.uniforms.waterReflectivity.value = newValue;
+    });
+    
+}
 
 function animate() {
-    waterSurface.material.uniforms.time.value = clock.getElapsedTime() / 10;
+    waterSurface.material.uniforms.time.value = clock.getElapsedTime() / 20;
 
     mirrorCam.position.set(cam.position.x, -cam.position.y, cam.position.z);
 
@@ -238,9 +233,26 @@ function animate() {
     target = new THREE.Vector3(cam.position.x, cam.position.y, cam.position.z);
     target.add(cameraDirection).reflect(new THREE.Vector3(0, 1, 0));
     mirrorCam.lookAt(target);
-
-    renderer.setRenderTarget(renderTarget);
+    
+    // Render Reflection (disable refraction)
+    objectToRefract.forEach(element => {
+        scene.remove(element);
+    });
+    renderer.setRenderTarget(renderTargetReflection);
     renderer.render(scene, mirrorCam);
+    // Render Refraction (disable reflection, add refraction)
+    objectToRefract.forEach(element => {
+        scene.add(element);
+    });
+    objectToReflect.forEach(element => {
+        scene.remove(element);
+    });
+    renderer.setRenderTarget(renderTargetRefraction);
+    renderer.render(scene, cam);
+    // Render whole scene (add reflection back)
+    objectToReflect.forEach(element => {
+        scene.add(element);
+    });
     renderer.setRenderTarget(null);
     renderer.render(scene, cam);
 
