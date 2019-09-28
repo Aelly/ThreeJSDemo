@@ -84,7 +84,7 @@ function init() {
 
 function loadShader() {
     console.log("LoadShader");
-    ShaderLoader("../Shader/water_vertex.glsl", "../Shader/water_fragment.glsl", function (vertex, fragment) {
+    ShaderLoader("https://raw.githubusercontent.com/Aelly/ThreeJSDemo/master/Shader/water_vertex.glsl", "https://raw.githubusercontent.com/Aelly/ThreeJSDemo/master/Shader/water_fragment.glsl", function (vertex, fragment) {
         vertexText = vertex;
         fragmentText = fragment;
         loadTexture();
