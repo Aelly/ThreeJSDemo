@@ -22,9 +22,6 @@ var objectToRefract = [];
 window.addEventListener('resize', onResize, false);
 var w, h;
 function onResize() {
-
-    console.log("Resize");
-
     w = window.innerWidth;
     h = window.innerHeight;
 
@@ -34,6 +31,8 @@ function onResize() {
 };
 
 function init() {
+    console.log("Init");
+
     scene = new THREE.Scene();
 
     renderTargetReflection = new THREE.WebGLRenderTarget(window.innerWidth, window.innerWidth);
@@ -84,6 +83,7 @@ function init() {
 }
 
 function loadShader() {
+    console.log("LoadShader");
     ShaderLoader("../Shader/water_vertex.glsl", "../Shader/water_fragment.glsl", function (vertex, fragment) {
         vertexText = vertex;
         fragmentText = fragment;
@@ -92,6 +92,7 @@ function loadShader() {
 }
 
 function loadTexture() {
+    console.log("LoadTexture");
     let loader = new THREE.TextureLoader();
     loader.load("../image/texture/ocean-floor.jpg", function (floor_Texture) {
         floorTexture = floor_Texture;
@@ -108,6 +109,7 @@ function loadTexture() {
 }
 
 function initWater() {
+    console.log("Init Water");
     let geometry = new THREE.PlaneBufferGeometry(30, 30, 32);
 
     var customUniforms = {
@@ -156,6 +158,8 @@ function initWater() {
 }
 
 function initObject() {
+    console.log("InitObject");
+
     // Floor
     let geometry = new THREE.PlaneBufferGeometry(30, 30, 32);
     let material = new THREE.MeshBasicMaterial({
@@ -208,6 +212,8 @@ function initObject() {
 }
 
 function setUpUI(){
+    console.log("SetUpUI");
+
     var Controller = function(){
         this.waterDistortion = 0.015;
         this.waterReflectivity = 0.2;
@@ -226,6 +232,8 @@ function setUpUI(){
 }
 
 function animate() {
+    console.log("Animate");
+
     waterSurface.material.uniforms.time.value = clock.getElapsedTime() / 20;
 
     mirrorCam.position.set(cam.position.x, -cam.position.y, cam.position.z);
