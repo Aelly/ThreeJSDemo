@@ -94,12 +94,12 @@ function loadShader() {
 function loadTexture() {
     console.log("LoadTexture");
     let loader = new THREE.TextureLoader();
-    loader.load("../image/texture/ocean-floor.jpg", function (floor_Texture) {
+    loader.load("https://raw.githubusercontent.com/Aelly/ThreeJSDemo/master/image/texture/ocean-floor.jpg", function (floor_Texture) {
         floorTexture = floor_Texture;
-        loader.load("../image/map/water_normal.png", function (texture_water) {
+        loader.load("https://raw.githubusercontent.com/Aelly/ThreeJSDemo/master/image/map/water_normal.png", function (texture_water) {
             waterNormalTexture = texture_water;
             waterNormalTexture.wrapS = waterNormalTexture.wrapT = THREE.RepeatWrapping
-            loader.load("../image/map/water_dudv.png", function(texture_distortion){
+            loader.load("https://raw.githubusercontent.com/Aelly/ThreeJSDemo/master/image/map/water_dudv.png", function(texture_distortion){
                 waterDistortionTexture = texture_distortion;
                 initObject();
             });
