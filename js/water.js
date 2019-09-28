@@ -23,6 +23,8 @@ window.addEventListener('resize', onResize, false);
 var w, h;
 function onResize() {
 
+    console.log("Resize");
+
     w = window.innerWidth;
     h = window.innerHeight;
 
